@@ -1,0 +1,225 @@
+﻿<Window x:Class="DownloadManagerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+       
+
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800" Width="1450"
+        Background="{DynamicResource MaterialDesignPaper}" >
+
+
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <materialDesign:Card  Margin="10"  Grid.Row="0" >
+            <StackPanel>
+                <CheckBox Content="Enable Drive Sync" Foreground ="White" IsChecked="{Binding IsSyncEnabled, Mode=TwoWay}" Margin="6"></CheckBox>
+                <TextBlock Text="Google Drive" FontSize="18" Foreground="White" HorizontalAlignment="Center"></TextBlock>
+                <TreeView ItemsSource="{Binding DriveFiles}" Height="680">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Margin="4">
+                                <materialDesign:PackIcon Kind="{Binding Icon}" Width="20" Height="20" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </StackPanel>
+        </materialDesign:Card>
+
+
+
+
+
+        <Grid Grid.Column ="1" x:Name="grid" Margin="1,0,-1,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="178*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="169*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+
+
+
+            <Label Content="Download Manager" HorizontalAlignment='Center' VerticalAlignment="Top" Grid.Row="0" FontWeight="Bold" />
+
+            <materialDesign:Card Margin="10,24,10,10" >
+                <Border Grid.Row="1" Margin="10" BorderThickness="1" BorderBrush="Gray">
+                    <oxy:PlotView Model="{Binding PlotVM.MyModel}" Height="300" Background="Transparent" />
+                </Border>
+            </materialDesign:Card>
+
+
+            <TextBox x:Name ="DownloadFromFilePath" Text ="{Binding FilePath,UpdateSourceTrigger=PropertyChanged }"  TextWrapping="Wrap" VerticalAlignment="Center" Grid.ColumnSpan="2" Height="25"  Grid.Row="2" Margin="20,10,105,10"    
+                     Foreground="{DynamicResource MaterialDesignBody}"
+                     Background="{DynamicResource MaterialDesignPaper}"
+                     CaretBrush="{DynamicResource MaterialDesignBody}"
+                     materialDesign:HintAssist.Hint="Enter file path to download from here..."
+                     />
+
+            <Button Command="{Binding LoadQueueCommand}" Grid.Column="2" Content="Add" Width="75" Margin="10,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right" Height="20" FontSize ="10" Grid.Row="2"/>
+
+
+
+
+
+            <materialDesign:Card  Margin="10" Padding="0" Grid.Row="3">
+                <ListView  ItemsSource="{Binding DownloadQueue}" Margin="10,10,10,10" Grid.Row="3" d:ItemsSource="{d:SampleData ItemCount=5}"   Background="{DynamicResource MaterialDesignCardBackground}" Foreground="{DynamicResource MaterialDesignBody}" IsManipulationEnabled="False"  >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Height" Value="30"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+
+                    <ListView.Resources>
+                        <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource MaterialDesignToolForegroundButton}">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property = "Background" Value ="{DynamicResource MaterialDesignLightSeparatorBackground}" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+
+
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" HorizontalAlignment="Left" FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GridView.ColumnHeaderTemplate>
+
+                            <GridViewColumn Header="Selected" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox x:Name="checkBox" IsChecked="{Binding IsSelected,Mode=TwoWay}" HorizontalAlignment="Center"></CheckBox>
+
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+                            <GridViewColumn Header="File Name" Width="130">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text= "{Binding FileName}"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="URI" Width="170">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Address}"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+                            <GridViewColumn Header="Size" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Size}"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+
+                            <GridViewColumn Header="Progress" Width="180">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ProgressBar MinWidth="100" MinHeight="10" Minimum="0" Maximum="100" Value="{Binding Progress}" Margin="0,0,5,0"/>
+                                            <TextBlock Text="{Binding Progress, StringFormat={}{0:F0}%}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+                            <GridViewColumn Header="Download Speed" Width="120">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DownloadSpeed}"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="ConnectionStatus" Width="140
+                                            ">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ConnectionStatus}"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+
+
+                            <GridViewColumn Header="Start Download" Width="110">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Download"
+                                                Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding}"
+                                                IsEnabled="{Binding IsCompleted}"
+                                        FontSize="10" Width="80" Height="20" />
+
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn Header="Pause/Resume" Width="110">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.PauseResumeCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}" Content="{Binding Status}" FontSize="10" Width="80" Height="20" IsEnabled="{Binding IsCompleted}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+
+
+
+
+
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </materialDesign:Card>
+
+            <Grid Grid.Row="4" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Label x:Name="DirectoryLabel" Grid.Column="0" Content="Select Directory" VerticalAlignment="Center" Margin="0,0,10,0" Height="25"/>
+
+                <TextBox  Text ="{Binding DestinationPath ,UpdateSourceTrigger=PropertyChanged }" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" Height="25"  Margin="0" 
+                 materialDesign:HintAssist.Hint="Enter directory destination path"
+                 Foreground="{DynamicResource MaterialDesignBody}"
+                 Background="{DynamicResource MaterialDesignPaper}"
+                 CaretBrush="{DynamicResource MaterialDesignBody}" />
+                <Button Command ="{Binding BrowseCommand}" Grid.Column="2" Content="Browse" FontSize ="10" Width="75" Margin="10,0,0,0" VerticalAlignment="Center" Height="20" MinWidth="80"/>
+                <Button Command="{Binding DeleteCommand}" Grid.Column="3" Content="Delete" FontSize="10" Width="75" Margin="10,0,0,0" VerticalAlignment="Center"  Height="20" MinWidth="80"/>
+            </Grid>
+            <Canvas/>
+        </Grid>
+    </Grid>
+</Window>
