@@ -7,6 +7,7 @@ using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -17,8 +18,6 @@ namespace DownloadManagerApp.ViewModels
 {
     public partial class PlotViewModel :ObservableObject
     {
-
-
         [ObservableProperty]
         public PlotModel myModel;
         public LineSeries lineSeries;
@@ -33,8 +32,8 @@ namespace DownloadManagerApp.ViewModels
            
             
             
-            DateTime date = DateTime.Now;
-           var timeAxes = new DateTimeAxis
+            DateTime date = DateTime.Today;
+            var timeAxes = new DateTimeAxis
             {
                 Minimum = DateTimeAxis.ToDouble(DateTime.Now.AddDays(-30)),
                 Maximum = DateTimeAxis.ToDouble(DateTime.Now),
@@ -67,24 +66,26 @@ namespace DownloadManagerApp.ViewModels
             MyModel.Series.Add(lineSeries);
         }
 
-        //initial saved previous downloads
+        //initialize previous downloads stored in the databasePointsList
         public void InitializePoints(List<PlotDataPoint> dbPointsList)
         {
 
             lineSeries.Points.Clear();
+            DateTime cutoffDate = DateTime.Today.AddDays(-30);
 
-            DateTime cutoffDate = DateTime.Now.AddDays(-30);
+            // Filter first, then assign
+            dataPointsList = dbPointsList
+                .Where(p => p.DownloadDate >= cutoffDate)
+                .OrderBy(p => p.DownloadDate)
+                .ToList();
 
-            dataPointsList = dbPointsList.OrderBy(p => p.DownloadDate).ToList();
-
-            //filter dataPoints List to only contain downloads before the cutoff date
-            dbPointsList.RemoveAll(p => p.DownloadDate < cutoffDate);
 
             for (int i = 0; i < dataPointsList.Count(); i++)
             {
                 var x = DateTimeAxis.ToDouble(dataPointsList[i].DownloadDate);
                 var y = dataPointsList[i].SizeInMB;
-                lineSeries.Points.Add(new DataPoint(x, y));
+
+                lineSeries.Points.Add(new DataPoint(x, y));  
             }
 
             MyModel.InvalidatePlot(true);
@@ -94,20 +95,42 @@ namespace DownloadManagerApp.ViewModels
 
         public List<PlotDataPoint> UpdatePoints(double downloadSize)
         {
-            var x = DateTimeAxis.ToDouble(DateTime.Now);
-            var y = downloadSize;
+            //check to see if a point already exists with the same date in the datapointslist
+            bool fileDownloadedTodayAlready = dataPointsList.Exists(p => p.DownloadDate == DateTime.Today);
 
-            lineSeries.Points.Add(new DataPoint(x, y));
+            if(fileDownloadedTodayAlready == true)
+            {
+                lineSeries.Points.Clear();
+
+                
+                var existingPoint = dataPointsList.FirstOrDefault(p => p.DownloadDate == DateTime.Today);
+
+                if (existingPoint != null)
+                {
+                    existingPoint.AddToSize(downloadSize);
+                }
+               
+
+                // reload all datapoints from the dataPointList into the lineSeries
+                for (int i = 0; i < dataPointsList.Count(); i++)
+                {
+                    var x = DateTimeAxis.ToDouble(dataPointsList[i].DownloadDate);
+                    var y = dataPointsList[i].SizeInMB;
+
+                    lineSeries.Points.Add(new DataPoint(x, y));
+                }
+
+            }
+            else
+            {
+                var newPoint = new PlotDataPoint(DateTime.Today, downloadSize);
+                dataPointsList.Add(newPoint);
+                lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(DateTime.Today), downloadSize));
+            }
 
             
-            dataPointsList.Add(new PlotDataPoint
-            {
-                DownloadDate = DateTime.Now,
-                SizeInMB = downloadSize
-            });
 
             MyModel.InvalidatePlot(true);
-
             return dataPointsList;
         }
     }

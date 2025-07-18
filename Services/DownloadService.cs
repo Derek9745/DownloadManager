@@ -319,8 +319,8 @@ namespace DownloadManagerApp.Services
                 //check if the http server allows partial downloads
                 if (response.StatusCode != HttpStatusCode.PartialContent && existingLength > 0)
                 {
-                    MessageBox.Show("Server does not support partial downloads, restating download");
-                    
+                    MessageBox.Show("Server does not support partial downloads, restarting download instead");
+                    return;
                 }
 
                 currentItem.ConnectionStatus = "Downloading";

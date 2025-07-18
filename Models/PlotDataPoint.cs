@@ -12,7 +12,21 @@ namespace DownloadManagerApp.Models
     {
         
         public double SizeInMB { get; set; }
-        public DateTime DownloadDate { get; set; }       
+        public DateTime DownloadDate { get; set; }
+
+        public PlotDataPoint() { }
+
+        public PlotDataPoint( DateTime downloadDate, double sizeInMB)
+        {
+           
+            this.DownloadDate = downloadDate;
+            this.SizeInMB = SizeInMB;
+        }
+
+        public void AddToSize(double downloadSize)
+        {
+            SizeInMB = SizeInMB + downloadSize;
+        }
 
     }
 }
