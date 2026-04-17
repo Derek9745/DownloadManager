@@ -3,4 +3,4 @@ Has optional support for google cloud file synchronization that is currently sti
 
 OxyPlot is used for graphing historic download usage as a line graph. Data Points are stored in a local sqlite database and loaded on application start. 
 
-<img width="3240" height="2030" alt="Screenshot (639)" src="https://github.com/user-attachments/assets/aa5fb270-8393-4ad5-b3b6-e822bd07e6eb" />
+<img width="24800" height="1024" alt="Screenshot (639)" src="https://github.com/user-attachments/assets/aa5fb270-8393-4ad5-b3b6-e822bd07e6eb" />
